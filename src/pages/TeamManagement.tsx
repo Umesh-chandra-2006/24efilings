@@ -10,11 +10,11 @@ import { Trash2 } from 'lucide-react';
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 
 interface TeamManagementProps {
-  teamMembers: User[];
-  allLeads: Lead[];
-  dateRange: { from: string; to: string };
-  setDateRange: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
-  onDeleteUsers: (userIds: string[]) => void;
+  teamMembers?: User[];
+  allLeads?: Lead[];
+  dateRange?: { from: string; to: string };
+  setDateRange?: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
+  onDeleteUsers?: (userIds: string[]) => void;
 }
 
 const TeamMemberCard: React.FC<{member: User, leads: Lead[], onClick: () => void, onDelete: (e: React.MouseEvent) => void}> = ({ member, leads, onClick, onDelete }) => {
@@ -68,7 +68,13 @@ const formatDate = (dateString: string) => {
         year: 'numeric'
     });
 };
-const TeamManagement: React.FC<TeamManagementProps> = ({ teamMembers, allLeads, dateRange, setDateRange, onDeleteUsers }) => {
+const TeamManagement: React.FC<TeamManagementProps> = ({
+  teamMembers = [],
+  allLeads = [],
+  dateRange = { from: '', to: '' },
+  setDateRange,
+  onDeleteUsers
+}) => {
   const [selectedMember, setSelectedMember] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
@@ -92,7 +98,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ teamMembers, allLeads, 
 
   const handleConfirmDelete = () => {
     if (userToDelete) {
-      onDeleteUsers([userToDelete.id]);
+      onDeleteUsers?.([userToDelete.id]);
       setUserToDelete(null);
       setIsDeleteConfirmOpen(false);
     }
@@ -128,7 +134,7 @@ const TeamManagement: React.FC<TeamManagementProps> = ({ teamMembers, allLeads, 
                 content={<Calendar dateRange={dateRange} onDateChange={setDateRange} />}
             />
             {(dateRange.from || dateRange.to) &&
-                <Button variant="ghost" size="sm" onClick={() => setDateRange({ from: '', to: '' })}>
+                <Button variant="ghost" size="sm" onClick={() => setDateRange?.({ from: '', to: '' })}>
                     Clear
                 </Button>
             }

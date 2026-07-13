@@ -14,15 +14,15 @@ import { UserTreeView } from '../components/users/UserTreeView';
 import { TransferUserModal } from '../components/users/TransferUserModal';
 
 interface UserManagementProps {
-  users: User[];
+  users?: User[];
   cities?: City[];
   branches?: Branch[];
-  onOpenUserForm: (user: User | null) => void;
-  onUpdateUser: (user: User) => void;
-  onDeleteUsers: (userIds: string[]) => void;
-  dateRange: { from: string; to: string };
-  setDateRange: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
-  userActivities: UserActivity[];
+  onOpenUserForm?: (user: User | null) => void;
+  onUpdateUser?: (user: User) => void;
+  onDeleteUsers?: (userIds: string[]) => void;
+  dateRange?: { from: string; to: string };
+  setDateRange?: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
+  userActivities?: UserActivity[];
   currentUserRole?: string;
   currentUser?: User;
   initialBranchFilter?: string | null;
@@ -99,17 +99,17 @@ const UserActivityTimeline: React.FC<{ activities: UserActivity[] }> = ({ activi
 };
 
 const UserManagement: React.FC<UserManagementProps> = ({ 
-  users, 
+  users = [], 
   cities = [], 
   branches = [], 
   onOpenUserForm, 
   onUpdateUser, 
   onDeleteUsers, 
-  dateRange, 
+  dateRange = { from: '', to: '' }, 
   setDateRange, 
-  userActivities, 
+  userActivities = [], 
   currentUserRole, 
-  currentUser,
+  currentUser = { id: '', name: '', role: 'Sales Executive' } as any,
   initialBranchFilter, 
   onFilterClear,
   onTransferUser
@@ -185,8 +185,8 @@ const UserManagement: React.FC<UserManagementProps> = ({
   }, [users, searchQuery, selectedRole, selectedCity, selectedBranch, selectedStatus, branches, cities]);
 
   // Actions
-  const handleAddNew = () => onOpenUserForm(null);
-  const handleEdit = (user: User) => onOpenUserForm(user);
+  const handleAddNew = () => onOpenUserForm?.(null);
+  const handleEdit = (user: User) => onOpenUserForm?.(user);
   
   const handleDeleteClick = (user: User) => {
     setUserToDelete(user);
@@ -195,14 +195,14 @@ const UserManagement: React.FC<UserManagementProps> = ({
 
   const handleConfirmDelete = () => {
     if (userToDelete) {
-      onDeleteUsers([userToDelete.id]);
+      onDeleteUsers?.([userToDelete.id]);
       setUserToDelete(null);
       setIsDeleteConfirmOpen(false);
     }
   };
 
   const handleStatusToggle = (user: User, checked: boolean) => {
-    onUpdateUser({ ...user, is_active: checked });
+    onUpdateUser?.({ ...user, is_active: checked });
   };
 
   const handleViewActivity = (user: User) => {
@@ -215,9 +215,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
   };
 
   const handleTransferSubmit = (userId: string, toCityId: string, toCityName: string, toBranchId: string, toBranchName: string) => {
-    if (onTransferUser) {
-      onTransferUser(userId, toCityId, toCityName, toBranchId, toBranchName);
-    }
+      onTransferUser?.(userId, toCityId, toCityName, toBranchId, toBranchName);
   };
 
   const selectedUserActivities = useMemo(() => {

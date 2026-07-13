@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Customer, Lead, Document, Payment, ServiceSet } from '../types';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -73,9 +74,9 @@ const INDUSTRY_TYPES = [
 ];
 
 interface CustomerDetailProps {
-    customer: Customer;
-    onBack: () => void;
-    leads: Lead[];
+    customer?: Customer;
+    onBack?: () => void;
+    leads?: Lead[];
     onAddActivityToLead?: (leadId: string, activityData: any) => Promise<void>;
     refreshData?: () => Promise<void>;
     onUpdateCustomer?: (customerId: string, updates: Partial<Customer>) => Promise<void>;
@@ -93,8 +94,30 @@ const DocStatusChip: React.FC<{ doc: Document | undefined }> = ({ doc }) => {
     return <a href={doc.url} target="_blank" rel="noopener noreferrer" className={`inline-block px-2 py-0.5 text-xs font-medium rounded-full ${colors[doc.status]} hover:opacity-80`} title={doc.name}>{doc.status}</a>;
 };
 
-const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onBack, leads, onAddActivityToLead, refreshData, onUpdateCustomer }) => {
-    const { leadSources, customers: allCustomers, users: allUsers } = useApi();
+const CustomerDetail: React.FC<CustomerDetailProps> = ({
+    customer: propsCustomer,
+    onBack: propsOnBack,
+    leads: propsLeads,
+    onAddActivityToLead,
+    refreshData,
+    onUpdateCustomer
+}) => {
+    const navigate = useNavigate();
+    const { customerId } = useParams();
+    const { leadSources, customers: allCustomers, users: allUsers, leads: apiLeads } = useApi();
+
+    const customer = propsCustomer ?? allCustomers.find(c => c.id === customerId);
+    const leads = propsLeads ?? apiLeads;
+    const onBack = propsOnBack ?? (() => navigate(-1));
+
+    if (!customer) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg border border-slate-200 p-8 shadow-sm">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4" />
+                <p className="text-slate-500">Loading customer details...</p>
+            </div>
+        );
+    }
     const [viewingPayment, setViewingPayment] = useState<Payment | null>(null);
     const [selectedPayments, setSelectedPayments] = useState<Payment[]>([]);
     const [isMultiReceiptOpen, setIsMultiReceiptOpen] = useState(false);

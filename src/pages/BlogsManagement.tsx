@@ -14,17 +14,17 @@ import {
 } from 'lucide-react';
 
 interface BlogsManagementProps {
-  blogs: Blog[];
-  onAddBlog: (payload: Omit<Blog, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
-  onUpdateBlog: (id: string, updates: Partial<Blog>) => Promise<void>;
-  onDeleteBlog: (id: string) => Promise<void>;
+  blogs?: Blog[];
+  onAddBlog?: (payload: Omit<Blog, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onUpdateBlog?: (id: string, updates: Partial<Blog>) => Promise<void>;
+  onDeleteBlog?: (id: string) => Promise<void>;
 }
 
 export default function BlogsManagement({
-  blogs,
-  onAddBlog,
-  onUpdateBlog,
-  onDeleteBlog
+  blogs = [],
+  onAddBlog = async () => {},
+  onUpdateBlog = async () => {},
+  onDeleteBlog = async () => {}
 }: BlogsManagementProps) {
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);

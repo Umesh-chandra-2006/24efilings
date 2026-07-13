@@ -13,19 +13,19 @@ import {
 } from 'lucide-react';
 
 interface WebLeadsManagementProps {
-  webLeads: WebLead[];
-  salesExecutives: User[];
-  onAssignWebLead: (id: string, assignedToId: string | null) => Promise<void>;
-  onUpdateWebLeadStatus: (id: string, status: WebLead['status']) => Promise<void>;
-  onConvertWebLeadToCrmLead: (id: string, assignedToId: string | null) => Promise<void>;
+  webLeads?: WebLead[];
+  salesExecutives?: User[];
+  onAssignWebLead?: (id: string, assignedToId: string | null) => Promise<void>;
+  onUpdateWebLeadStatus?: (id: string, status: WebLead['status']) => Promise<void>;
+  onConvertWebLeadToCrmLead?: (id: string, assignedToId: string | null) => Promise<void>;
 }
 
 export default function WebLeadsManagement({
-  webLeads,
-  salesExecutives,
-  onAssignWebLead,
-  onUpdateWebLeadStatus,
-  onConvertWebLeadToCrmLead
+  webLeads = [],
+  salesExecutives = [],
+  onAssignWebLead = async () => {},
+  onUpdateWebLeadStatus = async () => {},
+  onConvertWebLeadToCrmLead = async () => {}
 }: WebLeadsManagementProps) {
   const toast = useToast();
   const [activeTab, setActiveTab] = useState<WebLead['status']>('Pending');

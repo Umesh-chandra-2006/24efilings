@@ -146,7 +146,9 @@ const AppShellLayout = () => {
     services,
     offers,
     branches,
-    cities
+    cities,
+    transferLogs,
+    auditLogs
   } = apiData;
 
   // Active page resolution
@@ -365,6 +367,11 @@ const AppShellLayout = () => {
             offers,
             notifications,
             currentUser: profile,
+            allLeads: leads,
+            userRole: profile?.role,
+            transferLogs,
+            auditLogs,
+            teamMembers: users,
             
             dateRange: {
               from: globalFilterDateRange.from ? getLocalDateString(globalFilterDateRange.from) : '',
@@ -415,6 +422,35 @@ const AppShellLayout = () => {
             onUpdateTask: updateTaskOnLead,
             onDeleteTask: deleteTaskFromLead,
             onAddActivityToLead: apiData.addActivityToLead,
+            onUpdateMultipleLeads: updateMultipleLeads,
+            onDeleteMultipleLeads: deleteMultipleLeads,
+            onMarkAllRead: () => profile && apiData.markNotificationsAsRead(profile.id),
+            onAddOffer: apiData.addOffer,
+            onUpdateOffer: apiData.updateOffer,
+            onDeleteOffer: apiData.deleteOffer,
+            onUpdateCustomer: apiData.updateCustomer,
+            onAddBranch: apiData.addBranch,
+            onUpdateBranch: apiData.updateBranch,
+            onDeleteBranch: apiData.deleteBranch,
+            onAddCity: apiData.addCity,
+            onAddService: apiData.addService,
+            onUpdateService: apiData.updateService,
+            onDeleteService: apiData.deleteService,
+            onAddSubService: apiData.addSubService,
+            onUpdateSubService: apiData.updateSubService,
+            onDeleteSubService: apiData.deleteSubService,
+            onAddWebLead: apiData.addWebLead,
+            onAssignWebLead: apiData.assignWebLead,
+            onUpdateWebLeadStatus: apiData.updateWebLeadStatus,
+            onConvertWebLeadToCrmLead: apiData.convertWebLeadToCrmLead,
+            onUpdateWebLead: apiData.updateWebLead,
+            onDeleteWebLeads: apiData.deleteMultipleWebLeads,
+            onAddBlog: apiData.addBlog,
+            onUpdateBlog: apiData.updateBlog,
+            onDeleteBlog: apiData.deleteBlog,
+            onAddTestimonial: apiData.addTestimonial,
+            onUpdateTestimonialStatus: apiData.updateTestimonialStatus,
+            onDeleteTestimonial: apiData.deleteTestimonial,
             refreshData,
 
             isLeadFormOpen,

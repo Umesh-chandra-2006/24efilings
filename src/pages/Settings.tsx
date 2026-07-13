@@ -15,12 +15,16 @@ import { BillingSettings } from '../components/settings/BillingSettings';
 import { AuditLogsSettings } from '../components/settings/AuditLogsSettings';
 
 interface SettingsProps {
-    currentUser: User;
-    transferLogs: TransferLog[];
-    auditLogs: any[];
+    currentUser?: User;
+    transferLogs?: TransferLog[];
+    auditLogs?: any[];
 }
 
-const Settings: React.FC<SettingsProps> = ({ currentUser, transferLogs, auditLogs }) => {
+const Settings: React.FC<SettingsProps> = ({
+    currentUser = { id: '', name: '', role: 'Sales Executive' } as any,
+    transferLogs = [],
+    auditLogs = []
+}) => {
     // Toast State
     const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Lead, Activity, Document, Task, Payment, TaskPriority } from '../types';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -10,20 +11,21 @@ import { calculateLeadScore, getScoreCategory, getScoreBreakdown } from '../lib/
 import { Select } from '../components/ui/Select';
 import { ServiceSetItem } from '../components/ServiceSetItem';
 import { useApi } from '../hooks/useApi';
+import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 import { getNextPaymentSequenceClientSide, formatPaymentReferenceId } from '../lib/paymentUtils';
 
 interface LeadDetailProps {
-    lead: Lead;
-    onBack: () => void;
-    onUpdateLead: (lead: Lead) => void;
-    onAddActivity: (content: string) => void;
-    onUploadDocument: (file: File, docType: string) => Promise<void>;
-    onDeleteDocument: (docId: string) => Promise<void>;
-    onEditLead: () => void;
-    onAddTask: (content: string, dueDate: string | undefined, priority: TaskPriority) => Promise<void>;
-    onUpdateTask: (task: Task) => Promise<void>;
-    onDeleteTask: (taskId: string) => Promise<void>;
+    lead?: Lead;
+    onBack?: () => void;
+    onUpdateLead?: (lead: Lead) => void;
+    onAddActivity?: (content: string) => void;
+    onUploadDocument?: (file: File, docType: string) => Promise<void>;
+    onDeleteDocument?: (docId: string) => Promise<void>;
+    onEditLead?: () => void;
+    onAddTask?: (content: string, dueDate: string | undefined, priority: TaskPriority) => Promise<void>;
+    onUpdateTask?: (task: Task) => Promise<void>;
+    onDeleteTask?: (taskId: string) => Promise<void>;
 }
 
 interface DocumentUploadRow {
@@ -109,18 +111,69 @@ import { Dialog } from '../components/ui/Dialog';
 import { EditPaymentDialog } from '../components/EditPaymentDialog';
 
 const LeadDetail: React.FC<LeadDetailProps> = ({
-    lead,
-    onBack,
-    onUpdateLead,
-    onAddActivity,
-    onUploadDocument,
-    onDeleteDocument,
-    onEditLead,
-    onAddTask,
-    onUpdateTask,
-    onDeleteTask
+    lead: propsLead,
+    onBack: propsOnBack,
+    onUpdateLead: propsOnUpdateLead,
+    onAddActivity: propsOnAddActivity,
+    onUploadDocument: propsOnUploadDocument,
+    onDeleteDocument: propsOnDeleteDocument,
+    onEditLead: propsOnEditLead,
+    onAddTask: propsOnAddTask,
+    onUpdateTask: propsOnUpdateTask,
+    onDeleteTask: propsOnDeleteTask
 }) => {
+    const { leadId } = useParams();
+    const navigate = useNavigate();
+    const apiData = useApi();
+    const { profile } = useAuth();
     const { fetchLeadDetails } = useApi({ fetchOnMount: false });
+
+    const lead = propsLead ?? apiData.leads.find(l => l.id === leadId);
+
+    const onBack = propsOnBack ?? (() => navigate(-1));
+    const onUpdateLead = propsOnUpdateLead ?? (async (updatedLead) => {
+        await apiData.updateLead(updatedLead);
+    });
+    const onAddActivity = propsOnAddActivity ?? (async (content) => {
+        if (lead) await apiData.addActivityToLead(lead.id, { content, type: 'Note' });
+    });
+    const onUploadDocument = propsOnUploadDocument ?? (async (file, docType) => {
+        if (lead && profile) await apiData.uploadDocument(lead.id, file, docType, profile.id);
+    });
+    const onDeleteDocument = propsOnDeleteDocument ?? (async (docId) => {
+        if (lead) await apiData.deleteDocument(lead.id, docId);
+    });
+    const onEditLead = propsOnEditLead ?? (() => {
+        if (lead) {
+            // trigger edit lead modal
+        }
+    });
+    const onAddTask = propsOnAddTask ?? (async (content, dueDate, priority) => {
+        if (lead && profile) {
+            await apiData.addTaskToLead({
+                lead_id: lead.id,
+                content,
+                due_date: dueDate,
+                priority,
+                created_by: profile.id
+            });
+        }
+    });
+    const onUpdateTask = propsOnUpdateTask ?? (async (task) => {
+        if (lead) await apiData.updateTaskOnLead(lead.id, task);
+    });
+    const onDeleteTask = propsOnDeleteTask ?? (async (taskId) => {
+        if (lead) await apiData.deleteTaskFromLead(lead.id, taskId);
+    });
+
+    if (!lead) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg border border-slate-200 p-8 shadow-sm">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4" />
+                <p className="text-slate-500">Loading lead details...</p>
+            </div>
+        );
+    }
 
     // Local state for full details (Lazy Loading)
     const [details, setDetails] = useState<{

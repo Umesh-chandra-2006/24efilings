@@ -9,10 +9,10 @@ import { Dialog } from '../components/ui/Dialog';
 import { Textarea } from '../components/ui/Textarea';
 
 interface DocumentVerificationProps {
-  leads: Lead[];
-  dateRange: { from: string; to: string };
-  setDateRange: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
-  onUpdateDocumentStatus: (leadId: string, docId: string, status: 'Approved' | 'Rejected', notes: string) => void;
+  leads?: Lead[];
+  dateRange?: { from: string; to: string };
+  setDateRange?: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
+  onUpdateDocumentStatus?: (leadId: string, docId: string, status: 'Approved' | 'Rejected', notes: string) => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -24,7 +24,12 @@ const formatDate = (dateString: string) => {
   });
 };
 
-const DocumentVerification: React.FC<DocumentVerificationProps> = ({ leads, dateRange, setDateRange, onUpdateDocumentStatus }) => {
+const DocumentVerification: React.FC<DocumentVerificationProps> = ({
+  leads = [],
+  dateRange = { from: '', to: '' },
+  setDateRange,
+  onUpdateDocumentStatus
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalData, setModalData] = useState<{ lead: Lead, doc: DocType, action: 'Approved' | 'Rejected' } | null>(null);
   const [reason, setReason] = useState('');
@@ -48,7 +53,7 @@ const DocumentVerification: React.FC<DocumentVerificationProps> = ({ leads, date
 
   const handleConfirmAction = () => {
     if (modalData) {
-      onUpdateDocumentStatus(modalData.lead.id, modalData.doc.id, modalData.action, reason);
+      onUpdateDocumentStatus?.(modalData.lead.id, modalData.doc.id, modalData.action, reason);
       handleCloseModal();
     }
   };
@@ -89,7 +94,7 @@ const DocumentVerification: React.FC<DocumentVerificationProps> = ({ leads, date
             content={<Calendar dateRange={dateRange} onDateChange={setDateRange} />}
           />
           {(dateRange.from || dateRange.to) &&
-            <Button variant="ghost" size="sm" onClick={() => setDateRange({ from: '', to: '' })}>
+            <Button variant="ghost" size="sm" onClick={() => setDateRange?.({ from: '', to: '' })}>
               Clear
             </Button>
           }

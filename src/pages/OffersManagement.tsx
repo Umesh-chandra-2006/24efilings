@@ -10,14 +10,20 @@ import { useToast } from '../components/Toast';
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 
 interface OffersManagementProps {
-  offers: Offer[];
-  services: Service[];
-  onAddOffer: (offer: Omit<Offer, 'id' | 'created_at' | 'usage_count'>) => Promise<void>;
-  onUpdateOffer: (id: string, updates: Partial<Offer>) => Promise<void>;
-  onDeleteOffer: (id: string) => Promise<void>;
+  offers?: Offer[];
+  services?: Service[];
+  onAddOffer?: (offer: Omit<Offer, 'id' | 'created_at' | 'usage_count'>) => Promise<void>;
+  onUpdateOffer?: (id: string, updates: Partial<Offer>) => Promise<void>;
+  onDeleteOffer?: (id: string) => Promise<void>;
 }
 
-export default function OffersManagement({ offers, services, onAddOffer, onUpdateOffer, onDeleteOffer }: OffersManagementProps) {
+export default function OffersManagement({
+  offers = [],
+  services = [],
+  onAddOffer = async () => {},
+  onUpdateOffer = async () => {},
+  onDeleteOffer = async () => {}
+}: OffersManagementProps) {
   const toast = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<Offer | null>(null);

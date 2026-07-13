@@ -6,18 +6,28 @@ import { Card, CardContent } from '../components/ui/Card';
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 
 interface BranchManagementProps {
-  branches: Branch[];
-  users: User[];
-  cities: City[];
-  onAddBranch: (branch: Omit<Branch, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
-  onUpdateBranch: (id: string, branch: Partial<Branch>) => Promise<void>;
-  onDeleteBranch: (id: string) => Promise<void>;
+  branches?: Branch[];
+  users?: User[];
+  cities?: City[];
+  onAddBranch?: (branch: Omit<Branch, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  onUpdateBranch?: (id: string, branch: Partial<Branch>) => Promise<void>;
+  onDeleteBranch?: (id: string) => Promise<void>;
   onAddCity?: (cityName: string) => Promise<City>;
   onNavigateToUsers?: (branchName: string) => void;
   onUploadLogo?: (file: File) => Promise<string>;
 }
 
-export default function BranchManagement({ branches, users, cities = [], onAddBranch, onUpdateBranch, onDeleteBranch, onAddCity, onNavigateToUsers, onUploadLogo }: BranchManagementProps) {
+export default function BranchManagement({
+  branches = [],
+  users = [],
+  cities = [],
+  onAddBranch = async () => {},
+  onUpdateBranch = async () => {},
+  onDeleteBranch = async () => {},
+  onAddCity,
+  onNavigateToUsers = () => {},
+  onUploadLogo
+}: BranchManagementProps) {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);

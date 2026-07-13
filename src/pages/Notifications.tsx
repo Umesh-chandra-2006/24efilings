@@ -10,9 +10,9 @@ import { Notification } from '../types';
 import { Button } from '../components/ui/Button';
 
 interface NotificationsProps {
-    notifications: Notification[];
-    onMarkAllRead: () => void;
-    onNavigate: (page: 'Lead Detail' | 'Customer Detail', id: string) => void;
+    notifications?: Notification[];
+    onMarkAllRead?: () => void;
+    onNavigate?: (page: 'Lead Detail' | 'Customer Detail', id: string) => void;
 }
 
 const timeAgo = (dateString: string) => {
@@ -56,7 +56,11 @@ const NotificationIcon: React.FC<{ type: Notification['type'] }> = ({ type }) =>
     );
 };
 
-const Notifications: React.FC<NotificationsProps> = ({ notifications, onMarkAllRead, onNavigate }) => {
+const Notifications: React.FC<NotificationsProps> = ({
+    notifications = [],
+    onMarkAllRead = () => {},
+    onNavigate
+}) => {
     useEffect(() => {
         // Mark as read when the page is viewed, after a short delay
         const timeoutId = setTimeout(onMarkAllRead, 1000);
@@ -92,7 +96,7 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications, onMarkAllR
                                 <li
                                     key={notification.id}
                                     className={`py-4 px-6 flex items-start gap-4 transition-colors ${!notification.is_read ? 'bg-blue-50/50' : ''} ${notification.link ? 'cursor-pointer hover:bg-slate-100/50' : ''}`}
-                                    onClick={() => notification.link && onNavigate(notification.link.page, notification.link.id)}
+                                    onClick={() => notification.link && onNavigate?.(notification.link.page, notification.link.id)}
                                 >
                                     <NotificationIcon type={notification.type} />
                                     <div className="flex-1">

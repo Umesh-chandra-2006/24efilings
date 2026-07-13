@@ -11,19 +11,19 @@ import { SearchableSelect } from '../components/ui/SearchableSelect';
 import { getScoreCategory } from '../lib/scoring';
 
 interface LeadsOverviewProps {
-    leads: Lead[];
-    users: User[];
-    services: Service[];
+    leads?: Lead[];
+    users?: User[];
+    services?: Service[];
     offers?: Offer[];
-    onAddLead: () => void;
-    onUpdateLead: (lead: Lead) => void;
-    onViewLead: (leadId: string) => void;
-    onUpdateMultipleLeads: (leadIds: string[], updates: Partial<Omit<Lead, 'id'>>) => void;
-    onDeleteMultipleLeads: (leadIds: string[]) => void;
+    onAddLead?: () => void;
+    onUpdateLead?: (lead: Lead) => void;
+    onViewLead?: (leadId: string) => void;
+    onUpdateMultipleLeads?: (leadIds: string[], updates: Partial<Omit<Lead, 'id'>>) => void;
+    onDeleteMultipleLeads?: (leadIds: string[]) => void;
     title?: string;
-    dateRange: { from: string; to: string };
-    setDateRange: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
-    currentUser: User;
+    dateRange?: { from: string; to: string };
+    setDateRange?: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
+    currentUser?: User;
 }
 
 const MetricCard: React.FC<{ title: string, value: number, icon: React.ElementType, color: string }> = ({ title, value, icon: Icon, color }) => (
@@ -49,9 +49,9 @@ const formatDate = (dateString: string) => {
 
 
 const LeadsOverview: React.FC<LeadsOverviewProps> = ({
-    leads,
-    users,
-    services,
+    leads = [],
+    users = [],
+    services = [],
     offers = [],
     onAddLead,
     onUpdateLead,
@@ -59,9 +59,9 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
     onUpdateMultipleLeads,
     onDeleteMultipleLeads,
     title = 'Leads Overview',
-    dateRange,
+    dateRange = { from: '', to: '' },
     setDateRange,
-    currentUser,
+    currentUser = { id: '', name: '', role: 'Sales Executive' } as any,
 }) => {
     const [statusFilter, setStatusFilter] = useState('All');
     const [priorityFilter, setPriorityFilter] = useState('All');
@@ -229,7 +229,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                         </div>
                     )}
                     {(dateRange.from || dateRange.to) &&
-                        <Button variant="ghost" size="sm" onClick={() => setDateRange({ from: '', to: '' })}>
+                        <Button variant="ghost" size="sm" onClick={() => setDateRange?.({ from: '', to: '' })}>
                             Clear
                         </Button>
                     }

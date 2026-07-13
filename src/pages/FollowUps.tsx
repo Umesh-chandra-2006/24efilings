@@ -7,9 +7,9 @@ import { Popover } from '../components/ui/Popover';
 import { Calendar } from '../components/ui/Calendar';
 
 interface FollowUpsProps {
-    leads: Lead[];
-    dateRange: { from: string; to: string };
-    setDateRange: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
+    leads?: Lead[];
+    dateRange?: { from: string; to: string };
+    setDateRange?: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
     onViewLead?: (leadId: string) => void;
 }
 
@@ -45,7 +45,14 @@ const getPriorityColor = (priority: string) => {
     }
 };
 
-const FollowUps: React.FC<FollowUpsProps & { onUpdateTask: (leadId: string, task: Task) => void; onUpdateLead: (lead: Lead) => void; }> = ({ leads, dateRange, setDateRange, onViewLead, onUpdateTask, onUpdateLead }) => {
+const FollowUps: React.FC<FollowUpsProps & { onUpdateTask?: (leadId: string, task: Task) => void; onUpdateLead?: (lead: Lead) => void; }> = ({
+    leads = [],
+    dateRange = { from: '', to: '' },
+    setDateRange,
+    onViewLead,
+    onUpdateTask,
+    onUpdateLead
+}) => {
 
     const handleComplete = (item: FollowUpItem) => {
         const lead = leads.find(l => l.id === item.leadId);
@@ -55,14 +62,14 @@ const FollowUps: React.FC<FollowUpsProps & { onUpdateTask: (leadId: string, task
             const taskId = item.id.replace('task-', '');
             const task = lead.tasks?.find(t => t.id === taskId);
             if (task) {
-                onUpdateTask(lead.id, { ...task, is_completed: true, completed_at: new Date().toISOString() });
+                onUpdateTask?.(lead.id, { ...task, is_completed: true, completed_at: new Date().toISOString() });
             }
         } else {
             // For General Follow-up, we clear the date or move it? 
             // Usually 'Mark Done' implies the action is taken. We can clear the date.
             // Or better, we can maybe ask for outcome? For now, simplest is to clear it or mark as 'Success' if that was the goal?
             // Actually, just clearing next_follow_up is standard for "Done this follow up".
-            onUpdateLead({ ...lead, next_follow_up: undefined });
+            onUpdateLead?.({ ...lead, next_follow_up: undefined });
         }
     };
 
@@ -162,7 +169,7 @@ const FollowUps: React.FC<FollowUpsProps & { onUpdateTask: (leadId: string, task
             </h2>
             <div className="space-y-3 flex-1 overflow-y-auto pr-1">
                 {items.length > 0 ? items.map(item => (
-                    <Card key={item.id} className="hover:shadow-md transition-all duration-200 border-l-4 border-l-transparent hover:border-l-blue-500 cursor-pointer group relative" onClick={() => onViewLead && onViewLead(item.leadId)}>
+                    <Card key={item.id} className="hover:shadow-md transition-all duration-200 border-l-4 border-l-transparent hover:border-l-blue-500 cursor-pointer group relative" onClick={() => onViewLead?.(item.leadId)}>
                         <CardContent className="p-4">
                             <div className="flex justify-between items-start gap-2">
                                 <div>
@@ -229,7 +236,7 @@ const FollowUps: React.FC<FollowUpsProps & { onUpdateTask: (leadId: string, task
                         content={<Calendar dateRange={dateRange} onDateChange={setDateRange} />}
                     />
                     {(dateRange.from || dateRange.to) &&
-                        <Button variant="ghost" size="sm" onClick={() => setDateRange({ from: '', to: '' })} className="text-red-600 hover:text-red-700 hover:bg-red-50">
+                        <Button variant="ghost" size="sm" onClick={() => setDateRange?.({ from: '', to: '' })} className="text-red-600 hover:text-red-700 hover:bg-red-50">
                             Clear
                         </Button>
                     }

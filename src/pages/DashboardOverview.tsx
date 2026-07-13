@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lead, UserActivity, User, LeadStatus, Customer, UserRole, Service, Testimonial, Task, Branch, City } from '../types';
 import { useGlobalFilter } from '../contexts/GlobalFilterContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useApi } from '../hooks/useApi';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Popover } from '../components/ui/Popover';
@@ -608,29 +611,85 @@ const AiInsightsPanel: React.FC<{ insights: AiInsight[] }> = ({ insights }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface DashboardOverviewProps {
-    leads: Lead[];
-    users: User[];
-    customers: Customer[];
-    branches: Branch[];
+    leads?: Lead[];
+    users?: User[];
+    customers?: Customer[];
+    branches?: Branch[];
     cities?: City[];
-    userActivities: UserActivity[];
-    currentUser: User;
-    dateRange: { from: string; to: string };
-    setDateRange: (range: { from: string; to: string }) => void;
-    onViewCustomer: (customerId: string) => void;
+    userActivities?: UserActivity[];
+    currentUser?: User;
+    dateRange?: { from: string; to: string };
+    setDateRange?: (range: { from: string; to: string }) => void;
+    onViewCustomer?: (customerId: string) => void;
     onViewLead?: (leadId: string) => void;
-    onNavigate: (page: string) => void;
-    services: Service[];
+    onNavigate?: (page: string) => void;
+    services?: Service[];
     onAddActivityToLead?: (leadId: string, activityData: any) => Promise<void>;
     refreshData?: () => Promise<void>;
-    testimonials: Testimonial[];
+    testimonials?: Testimonial[];
 }
 
 const DashboardOverview: React.FC<DashboardOverviewProps> = ({
-    leads, users, customers, branches, cities = [], userActivities, currentUser, dateRange: propDateRange, setDateRange: propSetDateRange,
-    onViewCustomer, onViewLead,
-    onNavigate, services, onAddActivityToLead, refreshData, testimonials
+    leads: propsLeads,
+    users: propsUsers,
+    customers: propsCustomers,
+    branches: propsBranches,
+    cities: propsCities = [],
+    userActivities: propsUserActivities,
+    currentUser: propsCurrentUser,
+    dateRange: propDateRange,
+    setDateRange: propSetDateRange,
+    onViewCustomer: propsOnViewCustomer,
+    onViewLead: propsOnViewLead,
+    onNavigate: propsOnNavigate,
+    services: propsServices,
+    onAddActivityToLead: propsOnAddActivityToLead,
+    refreshData: propsRefreshData,
+    testimonials: propsTestimonials
 }) => {
+    const apiData = useApi();
+    const { profile } = useAuth();
+    const navigate = useNavigate();
+
+    // Fallbacks
+    const leads = propsLeads ?? apiData.leads;
+    const users = propsUsers ?? apiData.users;
+    const customers = propsCustomers ?? apiData.customers;
+    const branches = propsBranches ?? apiData.branches;
+    const cities = propsCities ?? apiData.cities ?? [];
+    const userActivities = propsUserActivities ?? apiData.userActivities;
+    const currentUser = propsCurrentUser ?? profile ?? apiData.users[0]; // fallback
+    const services = propsServices ?? apiData.services;
+    const testimonials = propsTestimonials ?? apiData.testimonials;
+    
+    const refreshData = propsRefreshData ?? apiData.refreshData;
+    const onAddActivityToLead = propsOnAddActivityToLead ?? apiData.addActivityToLead;
+
+    const onViewCustomer = propsOnViewCustomer ?? ((id) => navigate(`/customers/${id}`));
+    const onViewLead = propsOnViewLead ?? ((id) => navigate(`/leads/${id}`));
+    const onNavigate = propsOnNavigate ?? ((page) => {
+        if (page === 'Dashboard') navigate('/dashboard');
+        else if (page === 'All Leads') navigate('/leads');
+        else if (page === 'My Leads') navigate('/leads/my');
+        else if (page === 'Lead Workflow') navigate('/leads/workflow');
+        else if (page === 'Customers') navigate('/customers');
+        else if (page === 'User Management') navigate('/user-management');
+        else if (page === 'Team Management') navigate('/team-management');
+        else if (page === 'Reports' || page === 'Reports & Analytics') navigate('/reports');
+        else if (page === 'Activity Feed') navigate('/activity-feed');
+        else if (page === 'System Settings') navigate('/system-settings');
+        else if (page === 'Follow-ups') navigate('/follow-ups');
+        else if (page === 'Notifications') navigate('/notifications');
+        else if (page === 'Create New Lead') navigate('/leads/new');
+        else if (page === 'Payments') navigate('/payments');
+        else if (page === 'Branch Management') navigate('/branch-management');
+        else if (page === 'Services') navigate('/services');
+        else if (page === 'Offers & Coupons') navigate('/offers-coupons');
+        else if (page === '24efiling Web') navigate('/24efiling-web');
+        else if (page === 'Web Leads') navigate('/web-leads');
+        else if (page === 'Blogs') navigate('/blogs');
+        else if (page === 'Testimonials') navigate('/testimonials');
+    });
     const {
         cityId: cityFilter,
         branchId: branchFilter,

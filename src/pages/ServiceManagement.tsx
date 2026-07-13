@@ -10,17 +10,17 @@ import { useAuth } from '../contexts/AuthContext';
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 
 interface ServiceManagementProps {
-    services: Service[];
-    onAddService: (name: string) => Promise<void>;
-    onUpdateService: (id: string, updates: Partial<Service>) => Promise<void>;
-    onDeleteService: (id: string) => Promise<void>;
-    onAddSubService: (serviceId: string, subService: Omit<SubService, 'id' | 'created_at' | 'service_id'>) => Promise<void>;
-    onUpdateSubService: (id: string, updates: Partial<SubService>) => Promise<void>;
-    onDeleteSubService: (id: string) => Promise<void>;
+    services?: Service[];
+    onAddService?: (name: string) => Promise<void>;
+    onUpdateService?: (id: string, updates: Partial<Service>) => Promise<void>;
+    onDeleteService?: (id: string) => Promise<void>;
+    onAddSubService?: (serviceId: string, subService: Omit<SubService, 'id' | 'created_at' | 'service_id'>) => Promise<void>;
+    onUpdateSubService?: (id: string, updates: Partial<SubService>) => Promise<void>;
+    onDeleteSubService?: (id: string) => Promise<void>;
 }
 
 const ServiceManagement: React.FC<ServiceManagementProps> = ({
-    services,
+    services = [],
     onAddService,
     onUpdateService,
     onDeleteService,
@@ -63,9 +63,9 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({
         e.preventDefault();
         try {
             if (editingService) {
-                await onUpdateService(editingService.id, { name: serviceName });
+                await onUpdateService?.(editingService.id, { name: serviceName });
             } else {
-                await onAddService(serviceName);
+                await onAddService?.(serviceName);
             }
             setIsServiceModalOpen(false);
         } catch (error) {
@@ -103,9 +103,9 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({
             };
 
             if (editingSubService) {
-                await onUpdateSubService(editingSubService.id, payload);
+                await onUpdateSubService?.(editingSubService.id, payload);
             } else {
-                await onAddSubService(activeServiceId, payload);
+                await onAddSubService?.(activeServiceId, payload);
             }
             setIsSubServiceModalOpen(false);
         } catch (error) {
@@ -118,9 +118,9 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({
         if (!deleteConfirm) return;
         try {
             if (deleteConfirm.type === 'service') {
-                await onDeleteService(deleteConfirm.id);
+                await onDeleteService?.(deleteConfirm.id);
             } else {
-                await onDeleteSubService(deleteConfirm.id);
+                await onDeleteSubService?.(deleteConfirm.id);
             }
             setDeleteConfirm(null);
         } catch (error) {
@@ -131,7 +131,7 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
     const toggleStatus = async (sub: SubService) => {
         try {
-            await onUpdateSubService(sub.id, { is_active: !sub.is_active });
+            await onUpdateSubService?.(sub.id, { is_active: !sub.is_active });
         } catch (error) {
             console.error(error);
         }
@@ -139,7 +139,7 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({
 
     const toggleServiceStatus = async (service: Service) => {
         try {
-            await onUpdateService(service.id, { is_active: !service.is_active });
+            await onUpdateService?.(service.id, { is_active: !service.is_active });
         } catch (error) {
             console.error(error);
         }

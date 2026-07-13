@@ -10,15 +10,15 @@ import { cn } from '../lib/utils';
 import { Badge } from '../components/ui/Badge';
 
 interface LeadWorkflowProps {
-  leads: Lead[];
-  onUpdateLead: (lead: Lead) => void;
-  onViewLead: (leadId: string) => void;
-  onAddLead: () => void;
-  onDeleteLeads: (leadIds: string[]) => void;
-  dateRange: { from: string; to: string };
-  setDateRange: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
-  onOpenLeadForm: (lead: Lead | null) => void;
-  currentUser: User;
+  leads?: Lead[];
+  onUpdateLead?: (lead: Lead) => void;
+  onViewLead?: (leadId: string) => void;
+  onAddLead?: () => void;
+  onDeleteLeads?: (leadIds: string[]) => void;
+  dateRange?: { from: string; to: string };
+  setDateRange?: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
+  onOpenLeadForm?: (lead: Lead | null) => void;
+  currentUser?: User;
 }
 
 // Modern, colorful palette for workflow stages
@@ -80,7 +80,17 @@ const workflowStages: {
     },
   ];
 
-const LeadWorkflow: React.FC<LeadWorkflowProps> = ({ leads, onUpdateLead, onViewLead, onAddLead, onDeleteLeads, dateRange, setDateRange, onOpenLeadForm, currentUser }) => {
+const LeadWorkflow: React.FC<LeadWorkflowProps> = ({
+  leads = [],
+  onUpdateLead,
+  onViewLead,
+  onAddLead,
+  onDeleteLeads,
+  dateRange = { from: '', to: '' },
+  setDateRange,
+  onOpenLeadForm,
+  currentUser = { id: '', name: '', role: 'Sales Executive' } as any
+}) => {
   const [draggedOverColumn, setDraggedOverColumn] = useState<string | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null);
@@ -111,7 +121,7 @@ const LeadWorkflow: React.FC<LeadWorkflowProps> = ({ leads, onUpdateLead, onView
     const leadToUpdate = leads.find(l => l.id === leadId);
 
     if (leadToUpdate && leadToUpdate.status !== targetStatus) {
-      onUpdateLead({ ...leadToUpdate, status: targetStatus });
+      onUpdateLead?.({ ...leadToUpdate, status: targetStatus });
     }
   };
 
@@ -122,7 +132,7 @@ const LeadWorkflow: React.FC<LeadWorkflowProps> = ({ leads, onUpdateLead, onView
 
   const handleConfirmDelete = () => {
     if (leadToDelete) {
-      onDeleteLeads([leadToDelete.id]);
+      onDeleteLeads?.([leadToDelete.id]);
       setIsDeleteConfirmOpen(false);
       setLeadToDelete(null);
     }
@@ -166,12 +176,12 @@ const LeadWorkflow: React.FC<LeadWorkflowProps> = ({ leads, onUpdateLead, onView
             content={<Calendar dateRange={dateRange} onDateChange={setDateRange} />}
           />
           {(dateRange.from || dateRange.to) &&
-            <Button variant="ghost" size="icon" onClick={() => setDateRange({ from: '', to: '' })} title="Clear date filter" className="text-muted-foreground hover:text-foreground">
+            <Button variant="ghost" size="icon" onClick={() => setDateRange?.({ from: '', to: '' })} title="Clear date filter" className="text-muted-foreground hover:text-foreground">
               <X className="h-4 w-4" />
             </Button>
           }
           {canAddLead && (
-            <Button onClick={onAddLead} className="gap-2 shadow-md hover:shadow-lg transition-all">
+            <Button onClick={() => onAddLead?.()} className="gap-2 shadow-md hover:shadow-lg transition-all">
               <PlusCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Add Lead</span>
             </Button>
@@ -210,7 +220,7 @@ const LeadWorkflow: React.FC<LeadWorkflowProps> = ({ leads, onUpdateLead, onView
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
                       onViewLead={onViewLead}
-                      onEdit={() => onOpenLeadForm(lead)}
+                      onEdit={() => onOpenLeadForm?.(lead)}
                       onDelete={() => handleDeleteClick(lead)}
                     />
                   ))}

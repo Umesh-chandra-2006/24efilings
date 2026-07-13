@@ -10,17 +10,17 @@ import { Testimonial } from '../types';
 import { Star, PlusCircle, Trash2, CheckCircle, XCircle, Clock, AlertTriangle, User, Quote } from 'lucide-react';
 
 interface TestimonialsManagementProps {
-  testimonials: Testimonial[];
-  onAddTestimonial: (payload: Omit<Testimonial, 'id' | 'created_at'>) => Promise<void>;
-  onUpdateTestimonialStatus: (id: string, status: Testimonial['status']) => Promise<void>;
-  onDeleteTestimonial: (id: string) => Promise<void>;
+  testimonials?: Testimonial[];
+  onAddTestimonial?: (payload: Omit<Testimonial, 'id' | 'created_at'>) => Promise<void>;
+  onUpdateTestimonialStatus?: (id: string, status: Testimonial['status']) => Promise<void>;
+  onDeleteTestimonial?: (id: string) => Promise<void>;
 }
 
 export default function TestimonialsManagement({
-  testimonials,
-  onAddTestimonial,
-  onUpdateTestimonialStatus,
-  onDeleteTestimonial
+  testimonials = [],
+  onAddTestimonial = async () => {},
+  onUpdateTestimonialStatus = async () => {},
+  onDeleteTestimonial = async () => {}
 }: TestimonialsManagementProps) {
   const toast = useToast();
   const [activeFilter, setActiveFilter] = useState<'All' | Testimonial['status']>('All');

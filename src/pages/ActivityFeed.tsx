@@ -27,8 +27,8 @@ import {
 import { format, isToday, isYesterday, isWithinInterval, startOfDay, endOfDay, parseISO } from 'date-fns';
 
 interface ActivityFeedProps {
-    userActivities: UserActivity[];
-    users: User[];
+    userActivities?: UserActivity[];
+    users?: User[];
 }
 
 // Helper to categorize actions into "Modules"
@@ -95,7 +95,7 @@ const ActivityIcon: React.FC<{ action: string }> = ({ action }) => {
     );
 };
 
-const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) => {
+const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities = [], users = [] }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [userFilter, setUserFilter] = useState('all');
     const [roleFilter, setRoleFilter] = useState('all');

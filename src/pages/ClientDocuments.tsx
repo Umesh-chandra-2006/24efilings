@@ -8,12 +8,12 @@ import { Popover } from '../components/ui/Popover';
 import { Calendar } from '../components/ui/Calendar';
 
 interface ClientDocumentsProps {
-    leads: Lead[];
-    dateRange: { from: string; to: string };
-    setDateRange: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
-    onUploadDocument: (leadId: string, file: File) => Promise<void>;
-    onDeleteDocument: (leadId: string, docId: string) => Promise<void>;
-    onViewLead: (leadId: string) => void;
+    leads?: Lead[];
+    dateRange?: { from: string; to: string };
+    setDateRange?: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
+    onUploadDocument?: (leadId: string, file: File) => Promise<void>;
+    onDeleteDocument?: (leadId: string, docId: string) => Promise<void>;
+    onViewLead?: (leadId: string) => void;
 }
 
 const formatDate = (dateString: string) => {
@@ -25,7 +25,14 @@ const formatDate = (dateString: string) => {
     });
 };
 
-const ClientDocuments: React.FC<ClientDocumentsProps> = ({ leads, dateRange, setDateRange, onUploadDocument, onDeleteDocument, onViewLead }) => {
+const ClientDocuments: React.FC<ClientDocumentsProps> = ({
+    leads = [],
+    dateRange = { from: '', to: '' },
+    setDateRange,
+    onUploadDocument,
+    onDeleteDocument,
+    onViewLead
+}) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploadingLeadId, setUploadingLeadId] = useState<string | null>(null);
     const [docToDelete, setDocToDelete] = useState<{ leadId: string, doc: DocType } | null>(null);
@@ -50,7 +57,7 @@ const ClientDocuments: React.FC<ClientDocumentsProps> = ({ leads, dateRange, set
         const file = e.target.files?.[0];
         if (file && uploadingLeadId) {
             try {
-                await onUploadDocument(uploadingLeadId, file);
+                await onUploadDocument?.(uploadingLeadId, file);
             } catch (error) {
                 console.error("Upload failed", error);
             } finally {
@@ -67,7 +74,7 @@ const ClientDocuments: React.FC<ClientDocumentsProps> = ({ leads, dateRange, set
 
     const handleConfirmDelete = async () => {
         if (docToDelete) {
-            await onDeleteDocument(docToDelete.leadId, docToDelete.doc.id);
+            await onDeleteDocument?.(docToDelete.leadId, docToDelete.doc.id);
             setIsDeleteConfirmOpen(false);
             setDocToDelete(null);
         }
@@ -118,7 +125,7 @@ const ClientDocuments: React.FC<ClientDocumentsProps> = ({ leads, dateRange, set
                             content={<Calendar dateRange={dateRange} onDateChange={setDateRange} />}
                         />
                         {(dateRange.from || dateRange.to) &&
-                            <Button variant="ghost" size="icon" onClick={() => setDateRange({ from: '', to: '' })} className="text-red-500 hover:bg-red-50">
+                            <Button variant="ghost" size="icon" onClick={() => setDateRange?.({ from: '', to: '' })} className="text-red-500 hover:bg-red-50">
                                 <Trash2Icon className="h-4 w-4" />
                             </Button>
                         }
@@ -141,7 +148,7 @@ const ClientDocuments: React.FC<ClientDocumentsProps> = ({ leads, dateRange, set
                                 <tr key={lead.id} className="group hover:bg-slate-50/50 transition-colors">
                                     <td className="px-6 py-4 align-top">
                                         <div className="flex flex-col">
-                                            <button onClick={() => onViewLead(lead.id)} className="font-semibold text-slate-900 text-base text-left hover:text-blue-600 hover:underline transition-colors w-fit">
+                                            <button onClick={() => onViewLead?.(lead.id)} className="font-semibold text-slate-900 text-base text-left hover:text-blue-600 hover:underline transition-colors w-fit">
                                                 {lead.business_name}
                                             </button>
                                             <span className="text-slate-500">{lead.first_name} {lead.last_name}</span>

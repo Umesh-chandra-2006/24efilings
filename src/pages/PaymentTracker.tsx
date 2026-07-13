@@ -16,12 +16,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/Avatar';
 import { cn } from '../lib/utils';
 
 interface PaymentTrackerProps {
-    leads: Lead[];
+    leads?: Lead[];
     users?: User[];
     currentUser?: User;
-    dateRange: { from: string; to: string };
-    setDateRange: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
-    onViewLead: (leadId: string) => void;
+    dateRange?: { from: string; to: string };
+    setDateRange?: (value: React.SetStateAction<{ from: string; to: string; }>) => void;
+    onViewLead?: (leadId: string) => void;
 }
 
 interface Transaction {
@@ -63,7 +63,14 @@ const MetricCard: React.FC<{ title: string, value: string | number, description:
     </div>
 );
 
-const PaymentTracker: React.FC<PaymentTrackerProps> = ({ leads, users, currentUser, dateRange, setDateRange, onViewLead }) => {
+const PaymentTracker: React.FC<PaymentTrackerProps> = ({
+    leads = [],
+    users = [],
+    currentUser = { id: '', name: '', role: 'Sales Executive' } as any,
+    dateRange = { from: '', to: '' },
+    setDateRange,
+    onViewLead
+}) => {
     const [viewingInvoicesForLead, setViewingInvoicesForLead] = useState<Lead | null>(null);
     const [selectedServiceSet, setSelectedServiceSet] = useState<{ lead: Lead, set: any } | null>(null);
 
@@ -366,7 +373,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ leads, users, currentUs
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => onViewLead(lead.id)}>
+                            <DropdownMenuItem onClick={() => onViewLead?.(lead.id)}>
                                 View Lead
                             </DropdownMenuItem>
                             {hasServices && (

@@ -16,8 +16,8 @@ import { Textarea } from '../components/ui/Textarea';
 import { Checkbox } from '../components/ui/checkbox';
 
 interface WebOverviewProps {
-  services: Service[];
-  onAddWebLead: (payload: {
+  services?: Service[];
+  onAddWebLead?: (payload: {
     name: string;
     email: string;
     phone: string;
@@ -25,21 +25,21 @@ interface WebOverviewProps {
     message: string;
     status: 'Pending';
   }) => Promise<void>;
-  webLeads: WebLead[];
-  blogs: Blog[];
-  testimonials: Testimonial[];
+  webLeads?: WebLead[];
+  blogs?: Blog[];
+  testimonials?: Testimonial[];
   onUpdateWebLead?: (id: string, updates: Partial<WebLead>) => Promise<void>;
   onDeleteWebLeads?: (ids: string[]) => Promise<void>;
 }
 
 export default function WebOverview({ 
   services = [], 
-  onAddWebLead,
+  onAddWebLead = async () => {},
   webLeads = [], 
   blogs = [], 
   testimonials = [],
-  onUpdateWebLead,
-  onDeleteWebLeads
+  onUpdateWebLead = async () => {},
+  onDeleteWebLeads = async () => {}
 }: WebOverviewProps) {
   const toast = useToast();
   const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);

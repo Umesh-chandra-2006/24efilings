@@ -6,6 +6,7 @@ import { Popover } from '../components/ui/Popover';
 import { Calendar } from '../components/ui/Calendar';
 import { Select } from '../components/ui/Select';
 import { useApi } from '../hooks/useApi';
+import { useAuth } from '../contexts/AuthContext';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -1776,7 +1777,34 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
     );
 };
 
-const Reports: React.FC<{ userRole: User['role'], leads?: Lead[], users?: User[], allLeads?: Lead[], customers?: Customer[], dateRange: { from: string; to: string }, setDateRange: any, currentUser: User }> = (props) => {
+const Reports: React.FC<{
+    userRole?: User['role'];
+    leads?: Lead[];
+    users?: User[];
+    allLeads?: Lead[];
+    customers?: Customer[];
+    dateRange?: { from: string; to: string };
+    setDateRange?: any;
+    currentUser?: User;
+}> = ({
+    userRole,
+    leads = [],
+    users = [],
+    allLeads = [],
+    customers = [],
+    dateRange = { from: '', to: '' },
+    setDateRange = () => {},
+    currentUser
+}) => {
+    const apiData = useApi();
+    const { profile } = useAuth();
+    const finalUserRole = userRole ?? currentUser?.role ?? profile?.role ?? 'Sales Executive';
+    const finalCurrentUser = currentUser ?? profile ?? { id: '', name: '', role: finalUserRole } as any;
+    const finalAllLeads = allLeads.length > 0 ? allLeads : apiData.leads;
+    const finalLeads = leads.length > 0 ? leads : apiData.leads;
+    const finalCustomers = customers.length > 0 ? customers : apiData.customers;
+    const finalUsers = users.length > 0 ? users : apiData.users;
+
     return (
         <div className="w-full h-full flex flex-col gap-8 p-1">
              <div className="flex flex-col xl:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-200">
@@ -1787,10 +1815,10 @@ const Reports: React.FC<{ userRole: User['role'], leads?: Lead[], users?: User[]
             </div>
 
             <div className="flex-1 w-full">
-                {['Super Admin', 'Admin'].includes(props.userRole) ? (
-                    <AdvancedAdminReports users={props.users || []} allLeads={props.allLeads || []} customers={props.customers || []} role={props.userRole} dateRange={props.dateRange} setDateRange={props.setDateRange} currentUser={props.currentUser} />
+                {['Super Admin', 'Admin'].includes(finalUserRole) ? (
+                    <AdvancedAdminReports users={finalUsers} allLeads={finalAllLeads} customers={finalCustomers} role={finalUserRole} dateRange={dateRange} setDateRange={setDateRange} currentUser={finalCurrentUser} />
                 ) : (
-                    <AdvancedAdminReports users={props.users || []} allLeads={props.leads || []} customers={props.customers || []} role={props.userRole} dateRange={props.dateRange} setDateRange={props.setDateRange} currentUser={props.currentUser} />
+                    <AdvancedAdminReports users={finalUsers} allLeads={finalLeads} customers={finalCustomers} role={finalUserRole} dateRange={dateRange} setDateRange={setDateRange} currentUser={finalCurrentUser} />
                 )}
             </div>
         </div>
