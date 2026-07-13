@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog } from '../types';
 import { Database, Json } from '../lib/supabaseClient';
 import { calculateLeadScore } from '../lib/scoring';
@@ -481,7 +481,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
             // Fetch Transfer Logs & Audit Logs conditionally (if Super Admin or Admin)
             if (profile?.role === 'Super Admin' || profile?.role === 'Admin' || profile?.role === 'Branch Manager') {
                 try {
-                    const { data: transferLogsData, error: transferLogsError } = await supabase
+                    const { data: transferLogsData, error: transferLogsError } = await (supabase as any)
                         .from('user_transfer_logs')
                         .select('*')
                         .order('created_at', { ascending: false });
@@ -515,7 +515,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
 
                 if (profile?.role === 'Super Admin') {
                     try {
-                        const { data: auditLogsData, error: auditLogsError } = await supabase
+                        const { data: auditLogsData, error: auditLogsError } = await (supabase as any)
                             .from('audit_logs')
                             .select('*')
                             .order('created_at', { ascending: false })
@@ -649,7 +649,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
     const logAuditAction = useCallback(async (action: string, entity: string, entityId: string, details: any) => {
         if (!profile) return;
         try {
-            await (supabase.from('audit_logs') as any).insert([{
+            await (supabase as any).from('audit_logs').insert([{
                 user_id: profile.id,
                 action,
                 entity,
@@ -1308,7 +1308,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     transferred_by: profile.id,
                     transfer_type: transferType
                 };
-                await (supabase.from('user_transfer_logs') as any).insert([logEntry]);
+                await (supabase as any).from('user_transfer_logs').insert([logEntry]);
 
                 // Audit Log
                 await logAuditAction('User Transferred', 'User', id, {
@@ -1414,7 +1414,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
         };
 
         try {
-            await (supabase.from('user_transfer_logs') as any).insert([logEntry]);
+            await (supabase as any).from('user_transfer_logs').insert([logEntry]);
             await logAuditAction('User Transferred', 'User', userId, {
                 employee_name: userToTransfer.name,
                 from_city: userToTransfer.city_name,

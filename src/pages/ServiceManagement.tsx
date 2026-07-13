@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
 import { PlusIcon, Trash2Icon, EditIcon, CheckCircleIcon } from '../components/icons';
 import { Dialog } from '../components/ui/Dialog';
 import { Badge } from '../components/ui/Badge';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 
 interface ServiceManagementProps {

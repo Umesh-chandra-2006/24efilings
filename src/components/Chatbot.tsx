@@ -5,7 +5,7 @@ import { Button } from './ui/Button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardDescription } from './ui/Card';
 import { Input } from './ui/Input';
 import { VoiceChatIcon, XIcon } from './icons';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Message {
     role: 'user' | 'model';

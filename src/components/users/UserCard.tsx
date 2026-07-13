@@ -5,7 +5,6 @@ import { Mail, Phone, MapPin, Building2, MoreVertical, Edit2, Shield, Eye, Key, 
 import { Switch } from '../ui/Switch';
 import { Popover } from '../ui/Popover';
 import { getRoleColor } from '../../constants';
-import { formatDate } from '../../lib/utils'; // Assuming this exists or we can write a local one
 
 interface UserCardProps {
   user: User;

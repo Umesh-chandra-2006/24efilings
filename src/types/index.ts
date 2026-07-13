@@ -247,6 +247,7 @@ export type Lead = {
   created_by?: string; // ID of the creator
   assigned_at?: string; // Timestamp of assignment
   branch_id?: string;
+  branch_name?: string;
   created_at: string;
   last_contacted: string;
   next_follow_up?: string;

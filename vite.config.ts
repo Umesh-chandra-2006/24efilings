@@ -16,7 +16,30 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, '.'),
+          '@': path.resolve(__dirname, './src'),
+        }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+              'vendor-supabase': ['@supabase/supabase-js'],
+              'vendor-query': ['@tanstack/react-query'],
+              'vendor-radix': [
+                '@radix-ui/react-dialog',
+                '@radix-ui/react-dropdown-menu',
+                '@radix-ui/react-popover',
+                '@radix-ui/react-select',
+                '@radix-ui/react-switch',
+                '@radix-ui/react-avatar'
+              ],
+              'vendor-pdf': ['jspdf', 'jspdf-autotable', '@react-pdf/renderer'],
+              'vendor-xlsx': ['xlsx'],
+              'vendor-table': ['@tanstack/react-table'],
+              'vendor-ai': ['@google/genai']
+            }
+          }
         }
       }
     };
