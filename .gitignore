@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Credentials and Local Environment Files
+src/env.tsx
+.env
+.env.local
+.env.*.local
+
