@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useOutlet } from 'react-router-dom';
 import { Sidebar } from '@/components/Sidebar';
 import { Header } from '@/components/Header';
 import { GlobalFilterBar } from '@/components/ui/GlobalFilterBar';
@@ -8,6 +8,7 @@ import { LeadForm } from '@/components/LeadForm';
 import { SuccessConversionModal } from '@/components/ui/SuccessConversionModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApi } from '@/hooks/useApi';
+import { useGlobalFilter } from '@/contexts/GlobalFilterContext';
 import { useToast } from '@/components/Toast';
 import { User, Lead, TaskPriority, Task } from '@/types';
 
@@ -98,6 +99,13 @@ const uploadAvatar = async (fileData: string | undefined, fileNamePrefix: string
   }
 };
 
+const getLocalDateString = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+};
+
 import { supabase } from '@/lib/supabaseClient';
 
 export const AppShell = () => {
@@ -106,6 +114,8 @@ export const AppShell = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
+  const outlet = useOutlet();
+  const { dateRange: globalFilterDateRange, setDateRange: setGlobalFilterDateRange } = useGlobalFilter();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isUserFormOpen, setIsUserFormOpen] = useState(false);
@@ -343,7 +353,70 @@ export const AppShell = () => {
           </div>
         )}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-slate-50">
-          <Outlet context={{
+          {outlet ? React.cloneElement(outlet as React.ReactElement, {
+            leads,
+            users,
+            customers,
+            branches,
+            cities,
+            testimonials: apiData.testimonials || [],
+            userActivities: apiData.userActivities || [],
+            services,
+            offers,
+            notifications,
+            currentUser: profile,
+            
+            dateRange: {
+              from: globalFilterDateRange.from ? getLocalDateString(globalFilterDateRange.from) : '',
+              to: globalFilterDateRange.to ? getLocalDateString(globalFilterDateRange.to) : ''
+            },
+            setDateRange: (range: { from: string; to: string }) => {
+              setGlobalFilterDateRange({
+                from: range?.from ? new Date(range.from) : undefined,
+                to: range?.to ? new Date(range.to) : undefined
+              });
+            },
+
+            onViewCustomer: (customerId: string) => navigate(`/customers/${customerId}`),
+            onViewLead: (leadId: string) => navigate(`/leads/${leadId}`),
+            onNavigate: (page: string) => {
+              if (page === 'Dashboard') navigate('/dashboard');
+              else if (page === 'All Leads') navigate('/leads');
+              else if (page === 'My Leads') navigate('/leads/my');
+              else if (page === 'Lead Workflow') navigate('/leads/workflow');
+              else if (page === 'Customers') navigate('/customers');
+              else if (page === 'User Management') navigate('/user-management');
+              else if (page === 'Team Management') navigate('/team-management');
+              else if (page === 'Reports & Analytics' || page === 'Reports') navigate('/reports');
+              else if (page === 'Activity Feed') navigate('/activity-feed');
+              else if (page === 'System Settings') navigate('/system-settings');
+              else if (page === 'Follow-ups') navigate('/follow-ups');
+              else if (page === 'Notifications') navigate('/notifications');
+              else if (page === 'Create New Lead') navigate('/leads/new');
+              else if (page === 'Payments') navigate('/payments');
+              else if (page === 'Branch Management') navigate('/branch-management');
+              else if (page === 'Services') navigate('/services');
+              else if (page === 'Offers & Coupons') navigate('/offers-coupons');
+              else if (page === '24efiling Web') navigate('/24efiling-web');
+              else if (page === 'Web Leads') navigate('/web-leads');
+              else if (page === 'Blogs') navigate('/blogs');
+              else if (page === 'Testimonials') navigate('/testimonials');
+            },
+
+            onAddLead: addLead,
+            onUpdateLead: updateLead,
+            onUpdateUser: updateUser,
+            onDeleteLeads: deleteMultipleLeads,
+            onDeleteUsers: deleteMultipleUsers,
+            onUploadDocument: handleUploadDocument,
+            onDeleteDocument: handleDeleteDocument,
+            onUpdateDocumentStatus: updateDocumentStatus,
+            onAddTask: addTaskToLead,
+            onUpdateTask: updateTaskOnLead,
+            onDeleteTask: deleteTaskFromLead,
+            onAddActivityToLead: apiData.addActivityToLead,
+            refreshData,
+
             isLeadFormOpen,
             setIsLeadFormOpen,
             editingLead,
@@ -360,7 +433,7 @@ export const AppShell = () => {
               setEditingUser(user);
               setIsUserFormOpen(true);
             }
-          }} />
+          }) : null}
         </main>
       </div>
 
