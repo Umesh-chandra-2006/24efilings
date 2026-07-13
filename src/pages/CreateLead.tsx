@@ -1,7 +1,9 @@
 
 // pages/CreateLead.tsx
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lead, LeadPriority, ServiceSet, User, Service, Offer } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -14,14 +16,15 @@ import { InvoicePreview } from '../components/InvoicePreview';
 import { supabase } from '../lib/supabaseClient';
 import { getNextPaymentSequenceClientSide, formatPaymentReferenceId } from '../lib/paymentUtils';
 import { SearchableSelect } from '../components/ui/SearchableSelect';
+import { useToast } from '../components/Toast';
 
 interface CreateLeadProps {
-    onAddLead: (lead: Omit<Lead, 'id' | 'created_at' | 'last_contacted' | 'status' | 'assigned_to' | 'service_requested'>, assignedToId: string | null) => void;
-    onCancel: () => void;
-    salesExecutives: User[];
-    services: Service[];
-    leads: Lead[];
-    offers: Offer[];
+    onAddLead?: (lead: any, assignedToId: string | null) => void;
+    onCancel?: () => void;
+    salesExecutives?: User[];
+    services?: Service[];
+    leads?: Lead[];
+    offers?: Offer[];
 }
 
 // Standard ISO Country list
@@ -463,8 +466,64 @@ const initialAddressState: StructuredAddress = {
     zipCode: '',
 };
 
-const CreateLead: React.FC<CreateLeadProps> = ({ onAddLead, onCancel, salesExecutives, services, leads, offers }) => {
-    const { leadSources, customers: allCustomers, users: allUsers } = useApi();
+const CreateLead: React.FC<CreateLeadProps> = ({ 
+    onAddLead: propsOnAddLead, 
+    onCancel: propsOnCancel, 
+    salesExecutives: propsSalesExecutives, 
+    services: propsServices, 
+    leads: propsLeads, 
+    offers: propsOffers 
+}) => {
+    const apiData = useApi();
+    const { profile } = useAuth();
+    const navigate = useNavigate();
+    const toast = useToast();
+
+    // Fallbacks
+    const leads = propsLeads ?? apiData.leads;
+    const offers = propsOffers ?? apiData.offers;
+    const services = propsServices ?? apiData.services;
+    const salesExecutives = propsSalesExecutives ?? apiData.users.filter(u => u.role === 'Sales Executive' && u.is_active);
+
+    const onCancel = propsOnCancel ?? (() => navigate(-1));
+    const onAddLead = propsOnAddLead ?? (async (leadData: any, assignedToId: string | null) => {
+        if (!profile) return;
+        try {
+            let assigned_to: User | undefined = undefined;
+            if (assignedToId && assignedToId !== 'HEAD_OFFICE') {
+                assigned_to = apiData.users.find(u => u.id === assignedToId);
+                if (!assigned_to) {
+                    toast.addToast('Error: Could not find the selected user to assign.', 'error');
+                    return;
+                }
+            }
+
+            const totalPaymentFromSets = leadData.service_sets?.reduce((total: number, set: any) =>
+                total + set.subservices.reduce((subTotal: number, sub: any) => subTotal + (sub.amount * sub.quantity) + (Number(sub.tax_amount) || 0), 0) + (Number(set.service_fee) || 0), 0) || 0;
+
+            const requestedServices = leadData.service_sets?.flatMap((s: any) => s.subservices.map((sub: any) => sub.name));
+            const serviceRequestedString = requestedServices && requestedServices.length > 0 ? requestedServices.join(', ') : 'No service specified';
+
+            const newLeadData = {
+                ...leadData,
+                status: 'New Lead' as any,
+                assigned_to: assigned_to,
+                total_payment: totalPaymentFromSets,
+                service_requested: serviceRequestedString,
+                notes: assignedToId === 'HEAD_OFFICE'
+                    ? `[Assigned to Head Office]\n${leadData.notes || ''}`.trim()
+                    : leadData.notes,
+            };
+
+            await apiData.addLead(newLeadData);
+            toast.addToast('Lead created successfully!', 'success');
+            navigate('/leads');
+        } catch (error: any) {
+            toast.addToast(`Error: ${error.message}`, 'error');
+        }
+    });
+
+    const { leadSources, customers: allCustomers, users: allUsers } = apiData;
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
