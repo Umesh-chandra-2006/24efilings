@@ -8,7 +8,7 @@ import { LeadForm } from '@/components/LeadForm';
 import { SuccessConversionModal } from '@/components/ui/SuccessConversionModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useApi } from '@/hooks/useApi';
-import { useGlobalFilter } from '@/contexts/GlobalFilterContext';
+import { useGlobalFilter, GlobalFilterProvider } from '@/contexts/GlobalFilterContext';
 import { useToast } from '@/components/Toast';
 import { User, Lead, TaskPriority, Task } from '@/types';
 
@@ -108,7 +108,7 @@ const getLocalDateString = (date: Date) => {
 
 import { supabase } from '@/lib/supabaseClient';
 
-export const AppShell = () => {
+const AppShellLayout = () => {
   const { profile, signOut, createUserByAdmin, refreshProfile } = useAuth();
   const apiData = useApi();
   const location = useLocation();
@@ -468,5 +468,23 @@ export const AppShell = () => {
         lead={leadForCustomerCreation}
       />
     </div>
+  );
+};
+
+export const AppShell = () => {
+  const { profile } = useAuth();
+  const apiData = useApi();
+
+  if (!profile) return null;
+
+  return (
+    <GlobalFilterProvider
+      currentUser={profile}
+      allUsers={apiData.users}
+      allCities={apiData.cities}
+      allBranches={apiData.branches}
+    >
+      <AppShellLayout />
+    </GlobalFilterProvider>
   );
 };
